@@ -71,6 +71,26 @@ numbers drift across patch releases; the skill's first instruction is to re-veri
 against the copy on your disk, and every claim is written to be checkable in one
 grep.
 
+## Install
+
+Three ways, all equivalent once installed.
+
+**As a Claude Code plugin marketplace** — the native route, no third party:
+
+```
+/plugin marketplace add silkyland/ground-my-shopware
+/plugin install ground-my-shopware@ground-my-shopware
+```
+
+**By hand** — clone into your skills directory:
+
+```bash
+git clone https://github.com/silkyland/ground-my-shopware.git ~/.claude/skills/ground-my-shopware
+```
+
+**Per project** — vendor it into the repo that needs it, at
+`.claude/skills/ground-my-shopware/`, so the whole team gets it with a `git pull`.
+
 ## Licence
 
 MIT — see [LICENSE](LICENSE).
