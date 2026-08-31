@@ -20,14 +20,15 @@ modal has no `variant`".
 
 ## Getting there
 
-The admin route for a plugin module follows the module name: `dh-cx-warehouses`
-becomes `#/dh/cx/warehouses/list`. So a list page is
-`http://<shop>/admin#/dh/cx/warehouses/list`.
+The admin route for a plugin module is the module name with its dashes turned
+into path segments: a module registered as `acme-wms-warehouses` is reachable at
+`#/acme/wms/warehouses/list`. So a list page is
+`http://<shop>/admin#/acme/wms/warehouses/list`.
 
 Inside a long session, navigating by hash and waiting is faster than reloading:
 
 ```js
-location.hash = '#/dh/cx/warehouses/list';
+location.hash = '#/acme/wms/warehouses/list';
 await new Promise(r => setTimeout(r, 2500));
 ```
 
@@ -62,7 +63,7 @@ The test that decides whether an overflow is a defect. Run it at 1920 wide, then
 at ~1120:
 
 ```js
-const routes = ['/dh/cx/warehouses/list', '/dh/cx/subscriptions/list'];
+const routes = ['/acme/wms/warehouses/list', '/acme/wms/transfers/list'];
 const out = { viewport: [innerWidth, innerHeight] };
 for (const r of routes) {
   location.hash = '#' + r;
