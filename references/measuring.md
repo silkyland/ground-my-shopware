@@ -158,6 +158,36 @@ const a = document.activeElement, cs = getComputedStyle(a);
    offset: cs.outlineOffset, focusVisible: a.matches(':focus-visible') })
 ```
 
+## Probe 8 — errors you cannot catch, because they happen during boot
+
+`sw-error-boundary` wraps the whole desktop (`sw-desktop.html.twig`), so an error
+thrown by any component is **caught, logged and swallowed**: the console shows
+`An error was captured in current module:` with a minified stack, and propagation
+stops (`sw-error-boundary/index.js:39-43`). Installing your own
+`app.config.errorHandler` afterwards catches nothing — the boundary got there
+first, and a reload wipes your hook before the code that throws runs.
+
+The boundary also writes every one of those errors to the **`log_entry` table**,
+with the un-truncated stack in `context`. That is the copy to read:
+
+```sql
+SELECT created_at, message, LEFT(context, 900) AS context
+FROM log_entry
+WHERE created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+ORDER BY created_at DESC LIMIT 5\G
+```
+
+The stack in there names the real chunk and the real computed — for example
+`at Proxy.cover (…/assets/index-CfEb5aGN.js:1:2955)`, which identifies the lazy
+chunk of one component, where the console's `administration-*.js:62:2339` was
+only the boundary's own frame. Two errors from the same component's two computeds
+(`cover`, `mediaItems`) is the signature of one entity property arriving
+undefined, not of two bugs.
+
+Reproduce a boot-time error by **hard-reloading on the deep link**, not by
+navigating to the page: the failure often only exists on a cold mount, and
+clicking there from elsewhere gives you a fully-loaded store and no error.
+
 ## What to record
 
 For each defect, one line the fix can be measured against:

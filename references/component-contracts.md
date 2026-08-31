@@ -132,6 +132,50 @@ outranks your single class (0,1,0), so `.my-card { margin-top: 32px }` computes 
 table that needs more will scroll sideways forever. That is a real defect, unlike
 a grid that only overflows on a narrow window.
 
+### Which slot does my content belong in?
+
+`default` and `grid` render into the **same** `.mt-card__content`, so this is not
+a cosmetic choice — it decides that element's padding for everything inside it.
+
+| Card body | Slot | Why |
+|-----------|------|-----|
+| Only a grid (plus its empty state) | `#grid` | Adds `mt-card--grid` → `padding: 0`, so the table meets the card edge, as every core grid-in-a-card screen renders |
+| A grid **plus** form fields, filters or a banner | `default` | Zeroing the padding would strip the fields' gutter too. `mt-card--grid` keys off the slot *existing*, not off its content rendering, so you cannot have it both ways |
+| One action button | `#headerRight` | Right-aligned for free; no strip |
+| A control that fills a row — a search field, an entity select | `#toolbar` | The 69px strip earns its space. Core pairs a growing `sw-card-filter` with the Add button in `sw-settings-currency-detail.html.twig:187-204` |
+| Modals belonging to the card | `default` | They are fixed-position overlays; the padding they sit in is irrelevant |
+
+Two numbers make the first row concrete, measured in a 6.7.13.1 admin: a card
+with its grid in the default slot puts the table **25px** from the card's left
+border; in `#grid` it is **1px**. And a lone 123px button in `#toolbar` produced
+a **958×69px strip with 811px of nothing** in it.
+
+Core reaches zero padding two ways — 40 templates use `#grid`, 20 keep the
+default slot and write `.mt-card__content { padding: 0 }` locally
+(`sw-users-permissions-user-listing.scss:2`, `sw-flow-list.scss:5`,
+`sw-integration-list.scss:6`, `sw-product-properties.scss:4`). Either is
+idiomatic; neither leaves the band there.
+
+### The 4px gutter step nobody notices until they do
+
+`#grid` aligns the table to the card edge but **not** the first column to the
+card's heading: `sw-data-grid` pads cell content with 20px, `mt-card` insets its
+header with `--scale-size-24`. Measured from the card's left border that is 25px
+for the title against 21px for the first column — and core lives with it
+identically on the Users, Roles and Settings > Listing sorting-options cards.
+
+So closing it is a house preference, not a fix. If you do, scope it to a class
+cards opt into rather than restyling every grid in the Administration, and go
+four classes deep because core's rule is a three-class shorthand `padding`:
+
+```scss
+.my-grid-flush {
+    .sw-data-grid__row > .sw-data-grid__cell:first-child .sw-data-grid__cell-content {
+        padding-left: var(--scale-size-24);
+    }
+}
+```
+
 ## sw-data-grid
 
 `src/app/component/data-grid/sw-data-grid/`
@@ -171,6 +215,20 @@ Horizontal scroll is designed behaviour, not automatically a bug: the actions ce
 is `position: sticky; right: 0` with a gradient affordance (`:362`, `:458`), and
 `min-width: 88px` (`:250`). Judge it by whether the constraint moves with the
 viewport — see [measuring.md](measuring.md).
+
+**`plain-appearance` is a taste call, and core is split.** Every cell carries
+`border-right: 1px solid var(--color-border-secondary-default)` by default
+(`scss:39`, reinforced at `:48` for `--actions`); `plain-appearance` drops the
+vertical rules and keeps the row borders. Among core's grids that sit **inside a
+card** it is two-and-two: the Users and Roles cards keep the rules, the
+Flow-Builder list card and Settings > Listing's sorting-options card drop them.
+So there is no contract to obey here — pick one and be consistent across the
+screens of your own feature.
+
+What is *not* a fair comparison is a full-page grid. `sw-product-list` and
+friends carry `sw-data-grid--full-page`, a different layout mode; measuring your
+in-card grid against them is how you end up defending spacing that no in-card
+core screen uses. Compare like with like.
 
 ## sw-modal
 

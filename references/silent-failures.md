@@ -150,7 +150,34 @@ Write tag names without brackets in comments: `` `h3` ``, `` `div` ``.
 grep -Pzo '\{#[\s\S]*?#\}' path/to/template.html.twig | grep -o '<[/a-zA-Z][^>]*>'
 ```
 
-## 11. A test that pins the defect in place
+## 11. A grid in a card sits in a 24px band, or a toolbar strip is empty
+
+`mt-card` renders its `default` and `grid` slots into the same
+`.mt-card__content`. A grid left in the default slot keeps the card's
+`--scale-size-24` inset, so the table floats in a band while a `#toolbar` strip
+above it bleeds to the card edge — two different edges in one card. And a single
+button dropped into `#toolbar` produces a 69px strip that is mostly empty,
+because that slot is built for a control that fills it.
+
+Neither throws, and both look plausible until you measure the table's inset
+against a core grid-in-a-card screen. The slot decision table is in
+[component-contracts.md](component-contracts.md#which-slot-does-my-content-belong-in).
+
+## 12. Comparing against the wrong class of core screen
+
+Not a rendering defect — a reasoning defect, and the one most likely to make you
+defend something wrong with real evidence. `sw-data-grid` behaves differently as
+a full-page grid (`sw-data-grid--full-page`) than inside a card, and `sw-modal`
+and `mt-card` both cap their width **independently of the viewport** while a page
+does not.
+
+So before concluding "core does it this way", check that the core screen you
+measured is the same kind of container as yours: in-card against in-card,
+full-page against full-page, modal against modal. Measuring an in-card grid
+against the product list is how a 700px modal cap gets excused as normal
+responsive behaviour.
+
+## 13. A test that pins the defect in place
 
 Not a rendering failure, but the reason one survives: a spec asserting
 `toContain('<template #action>')` locks in a slot that does not exist. When a test
@@ -174,7 +201,8 @@ grep -rn ':style=\|style="' src/Resources/app/administration/src --include='*.tw
 grep -rn '#[0-9a-fA-F]\{3,6\}\b' src/Resources/app/administration/src --include='*.twig'
 grep -rn -- '--color-gray-\|--color-darkgray-' src/Resources/app/administration/src
 grep -rn "width: '[0-9]*px'" src/Resources/app/administration/src --include='*.ts'
+grep -rln '<mt-card' src/Resources/app/administration/src --include='*.twig' | xargs grep -l 'sw-data-grid' | xargs grep -L 'template #grid'
 ```
 
-Each line maps to an entry above. None of them is a substitute for reading the
+Each line maps to an entry above — the last one lists every card whose grid is still in the default slot. None of them is a substitute for reading the
 component, but they find the cheap defects in seconds.
