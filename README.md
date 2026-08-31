@@ -6,7 +6,7 @@ the result.**
 
 `ground-my-shopware` is an agent skill for building and repairing Shopware 6
 Administration and Storefront UI. It is the Shopware-specific counterpart to
-[`ground-my-ui`](../ground-my-ui): where that skill teaches the stack-agnostic
+[`ground-my-ui`](https://github.com/silkyland/ground-my-ui): where that skill teaches the stack-agnostic
 method, this one carries the verified contracts — `mt-card`'s twelve slots,
 `sw-data-grid`'s preview slot, `sw-modal`'s four width caps, which package defines
 `--scale-size-*`, and the core file to copy for each of them.
